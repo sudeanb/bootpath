@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BootPath — x86 boot, step by step</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>⏻ BootPath <span class="sub">— BIOS → MBR → protected → long mode → C, narrated</span></h1>
+  <p class="note">the stages/*.S and kernel.c here are the REAL code — CI boots this exact image in QEMU
+  and asserts the markers on serial. <a href="https://github.com/sudeanb/bootpath">repo →</a></p>
+</header>
+
+<section class="panel terminal">
+  <h2>serial output <span class="sub">(what CI greps)</span></h2>
+  <pre id="serial"></pre>
+  <button id="boot">▶ boot again</button>
+  <span id="bootState" class="legend"></span>
+</section>
+
+<main class="cols">
+  <nav class="panel" id="stageNav"></nav>
+  <section class="panel" id="stageView">
+    <h2 id="stName"></h2>
+    <div class="kv">
+      <span class="k">mode</span><span id="stMode"></span>
+      <span class="k">cpu</span><span id="stCpu"></span>
+      <span class="k">memory</span><span id="stMem"></span>
+      <span class="k">registers</span><span id="stReg"></span>
+    </div>
+    <p id="stExpl" class="expl"></p>
+    <pre id="stCode"></pre>
+  </section>
+</main>
+
+<footer>
+  <p>every excerpt on this page is verified to be a substring of the real source by the test suite —
+     the page cannot drift from the code. <a href="https://github.com/sudeanb/bootpath#readme">README →</a></p>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

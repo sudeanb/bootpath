@@ -1,0 +1,10 @@
+{
+  "name": "bootpath",
+  "version": "0.1.0",
+  "description": "⏻ The x86 boot ladder as real code: MBR → stage 2 → protected mode → long mode → C kernel, each stage announcing itself over serial — booted and marker-asserted in QEMU on every push. Zero JS dependencies (the web walkthrough is static).",
+  "type": "module",
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=18" },
+  "keywords": ["x86", "bootloader", "real-mode", "protected-mode", "long-mode", "qemu", "operating-systems", "education"],
+  "license": "MIT"
+}
