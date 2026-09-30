@@ -154,7 +154,21 @@ putc64:
 .code16
 msg_real:    .ascii "BP:2-STAGE2-REAL\r\n"
 msg_kernel:  .ascii "BP:2-KERNEL-LOADED\r\n"
+msg_pm:      .ascii "BP:2-PROTECTED-32\r\n"
 msg_diskerr: .ascii "BP:2-DISK-ERROR\r\n"
+
+dap:                             /* extended read: 32 sectors @ LBA 8 → 1000:0000 */
+    .byte 0x10, 0
+    .word 32                     /* sector count */
+    .word 0x0000                 /* offset */
+    .word 0x1000                 /* segment → linear 0x10000 */
+    .quad 8                      /* starting LBA */
+
+disk_fail:                       /* still in real mode here */
+    mov si, offset msg_diskerr
+    call puts16
+1:  hlt
+    jmp 1b
 
 .align 8
 gdt:

@@ -38,7 +38,7 @@ export const STAGES = [
     memory: 'GDT: 0x00 null · 0x08 code32 (base 0, limit 4G) · 0x10 data · 0x18 code64 (L=1, for later)',
     registers: 'DS=ES=SS=0x10, ESP=0x7C00; EAX holds CR0 mid-update',
     explanation: 'Segments become selectors into the GDT instead of real-mode paragraphs. paging is still off; addresses are linear and, with base-0 segments, identical to physical.',
-    markers: ['BP:2-STAGE2-REAL'],
+    markers: ['BP:2-STAGE2-REAL', 'BP:2-PROTECTED-32'],
     excerpt: 'mov eax, cr0\n    or eax, 1\n    mov cr0, eax',
   },
   {
