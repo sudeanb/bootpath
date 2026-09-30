@@ -20,6 +20,7 @@ setup:
     mov ss, ax
     mov sp, 0x7C00
     sti
+    cld                          /* BIOS may leave DF set — lodsb must go forward */
 
     /* ---- init COM1: 115200 8N1, FIFO ---- */
     mov dx, 0x3F9               /* IER: disable serial interrupts */
