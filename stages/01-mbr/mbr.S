@@ -45,7 +45,7 @@ setup:
     out dx, al
 
     /* ---- print BP:1-REAL-MODE ---- */
-    mov si, msg_real
+    mov si, offset msg_real
 1:  lodsb
     test al, al
     jz 1f
@@ -53,12 +53,12 @@ setup:
     jmp 1b
 1:
     /* ---- load stage 2: sectors 2-5 (CHS 0/0/2, 4 sectors) → 0000:7E00 ---- */
-    mov si, dap
+    mov si, offset dap
     mov ah, 0x42                /* extended read (LBA) — deterministic, no CHS math */
     mov dl, 0x80                /* BIOS passes the boot drive in DL */
     int 0x13
     jc disk_fail
-    mov si, msg_loaded
+    mov si, offset msg_loaded
 2:  lodsb
     test al, al
     jz 3f
@@ -68,7 +68,7 @@ setup:
     ljmp 0x0000, 0x7E00           /* hand off to stage 2 */
 
 disk_fail:
-    mov si, msg_diskerr
+    mov si, offset msg_diskerr
 4:  lodsb
     test al, al
     jz 5f

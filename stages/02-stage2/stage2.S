@@ -8,16 +8,16 @@
 .text
 _start:
     cld
-    mov si, msg_real
+    mov si, offset msg_real
     call puts16
 
     /* ---- load the kernel: 32 sectors @ LBA 8 → 1000:0000 (0x10000) ---- */
-    mov si, dap
+    mov si, offset dap
     mov ah, 0x42
     mov dl, 0x80
     int 0x13
     jc disk_fail
-    mov si, msg_kernel
+    mov si, offset msg_kernel
     call puts16
 
     /* ---- GDT: 0x00 null · 0x08 code32 · 0x10 data · 0x18 code64 ---- */
@@ -40,7 +40,7 @@ pm32:
     mov ss, ax
     mov esp, 0x7C00
 
-    mov si, msg_pm
+    mov si, offset msg_pm
     call puts32
 
     /* ---- identity-map the first 4 MiB with 2 MiB pages ----
