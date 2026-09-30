@@ -27,7 +27,7 @@ export const STAGES = [
     registers: 'DL still the boot drive; SI walks the message strings (cld guarantees forward lodsb)',
     explanation: 'Stage 2 pulls the future kernel from disk, still through BIOS services. From here on there is no going back to BIOS — once paging is on, interrupt and disk services are ours to build.',
     markers: ['BP:2-STAGE2-REAL', 'BP:2-KERNEL-LOADED'],
-    excerpt: 'mov si, dap\n    mov ah, 0x42\n    mov dl, 0x80\n    int 0x13',
+    excerpt: 'mov si, offset dap\n    mov ah, 0x42\n    mov dl, 0x80\n    int 0x13',
   },
   {
     id: 's3',
