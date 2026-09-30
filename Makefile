@@ -42,8 +42,12 @@ os.img: mbr.bin stage2.bin kernel.bin
 boot-test: os.img
 	timeout 25 $(QEMU) -m 64M -drive format=raw,file=os.img \
 	  -display none -no-reboot -no-shutdown \
-	  -serial file:serial.out || true
-	@echo "=== serial output ==="; cat serial.out
+	  -serial file:serial.out \
+	  -d int,cpu_reset -D qemu.int.log || true
+	@echo "=== serial output ($$(wc -c < serial.out) bytes) ==="; cat serial.out
+	@echo "=== qemu exceptions/resets (last 15) ==="; \
+	grep -E "v=" qemu.int.log 2>/dev/null | tail -15 || true; \
+	grep -E "Triple|RESET" qemu.int.log 2>/dev/null | tail -3 || true
 	@missing=0; for m in $(MARKERS); do \
 	  grep -q "$$m" serial.out || { echo "MISSING MARKER: $$m"; missing=1; }; done; \
 	exit $$missing
