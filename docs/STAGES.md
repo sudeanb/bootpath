@@ -2,7 +2,7 @@
 
 The chain: `stages/01-mbr` (BIOS handoff) → `stages/02-stage2` (real →
 protected → long) → `stages/03-kernel` (C, 64-bit). One serial port
-(COM1, 115200 8N1) narrates the whole journey; CI boots the image in
+(COM1, 38400 8N1) narrates the whole journey; CI boots the image in
 QEMU and asserts every `BP:` marker.
 
 ## Stage 1 — MBR (real mode, 512 bytes)
@@ -15,18 +15,25 @@ QEMU and asserts every `BP:` marker.
 
 What it does:
 
-1. zero the segment registers, stack to `0x7C00` (grows down, away from code)
-2. init COM1: IER=0, LCR DLAB → divisor 3 (38400), 8N1, FIFO on, MCR DTR|RTS|OUT2
-3. print `BP:1-REAL-MODE`
-4. int 13h AH=42h (extended read, LBA DAP): 4 sectors from LBA 1 → `0000:7E00`
-5. print `BP:1-STAGE2-LOADED`, `ljmp 0x0000, 0x7E00`
+1. save the boot drive from `DL` — the COM1 init below clobbers `DX`, and a
+   clobbered drive number makes int 13h fail with DISK-ERROR (the original bug)
+2. zero the segment registers, stack to `0x7C00` (grows down, away from code)
+3. init COM1: IER=0, LCR DLAB → divisor 3 (38400), 8N1, FIFO on, MCR DTR|RTS|OUT2
+4. int 13h AH=02h (CHS read — works on every BIOS): 4 sectors from C0/H0/S2 →
+   `0000:7E00`, returned sector count verified against 4
+5. print `BP:1-REAL-MODE`, `BP:1-STAGE2-LOADED`, `ljmp 0x0000, 0x7E00`
 
-Byte 510–511 must be `55 AA` or BIOS refuses the sector.
+Byte 510–511 must be `55 AA` or BIOS refuses the sector — and silently, with
+no serial output at all. The padding must therefore total exactly 512:
+`.space 510 - (. - _start)` followed by `.word 0xAA55` (an extra `- 2` in the
+padding double-counts the signature and produces a 510-byte image that never
+boots).
 
 ## Stage 2 — the mode ladder (still one asm file)
 
 **2a. real mode.** Same CPU, no more 510-byte limit. Loads the kernel:
-32 sectors from LBA 8 → `1000:0000` (= physical 0x10000). Prints
+32 sectors via int 13h AH=02h from C0/H0/S9 → `1000:0000` (= physical
+0x10000), count verified. Prints
 `BP:2-STAGE2-REAL`, `BP:2-KERNEL-LOADED`. `cli` from here on — no BIOS
 calls survive the mode switch.
 

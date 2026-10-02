@@ -30,12 +30,14 @@ test('every marker is emitted by the real stage code', () => {
   }
 });
 
-test('mbr has the boot signature and loads stage 2 from LBA 1', () => {
+test('mbr has the boot signature and loads stage 2 from sector 2', () => {
   const mbr = read('stages/01-mbr/mbr.S');
-  assert.match(mbr, /0xAA55/);
-  assert.match(mbr, /0x42/);                 // extended read
-  assert.match(mbr, /\.quad 1\b/);           // DAP starting LBA = 1
-  assert.match(mbr, /ljmp 0x0000, 0x7E00/);  // handoff
+  assert.match(mbr, /dw 0xAA55/);                     // signature emitted at 510
+  assert.match(mbr, /times 510-\(\$-\$\$\) db 0/);    // pad+sig must total 512 — no double counting
+  assert.match(mbr, /mov \[boot_drive\], dl/);        // DL saved before serial init clobbers DX
+  assert.match(mbr, /mov ah, 0x02/);                  // CHS read — works on every BIOS
+  assert.match(mbr, /mov cl, 2/);                     // sector 2 -> linear 0x7E00
+  assert.match(mbr, /jmp 0x0000:0x7E00/);             // handoff
 });
 
 test('stage 2 contains the full mode ladder', () => {
@@ -47,7 +49,7 @@ test('stage 2 contains the full mode ladder', () => {
   assert.match(s2, /or eax, 0x80000000/);             // CR0.PG
   assert.match(s2, /mov cr3, eax/);
   assert.match(s2, /0x00209A0000000000/);             // code64 descriptor, L=1
-  assert.match(s2, /ljmp \$0x18, \$lm64/);            // the far jump into 64-bit
+  assert.match(s2, /jmp 0x18:lm64/);                  // the far jump into 64-bit
 });
 
 test('kernel emits the final C markers', () => {

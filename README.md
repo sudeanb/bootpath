@@ -50,8 +50,9 @@ CI does all four on every push; the boot test is the real proof.
 ## How it works
 
 `docs/STAGES.md` narrates the ladder with the exact CPU/memory state at
-each border: segment zeroing, the COM1 init sequence, the LBA disk
-address packet, the GDT layout (code32 / data / code64 with L=1), the
+each border: segment zeroing, the COM1 init sequence, the CHS disk
+read (and why the boot drive is saved before any serial output), the
+GDT layout (code32 / data / code64 with L=1), the
 `CR0.PE` far-jump trick, the three-page identity map (2 MiB pages,
 PML4→PDPT→PD at 0x9000/0xA000/0xB000), and the IA32_EFER dance that
 turns 32-bit protected into 64-bit long mode.
@@ -75,7 +76,8 @@ Two layers:
 2. **Structural (everywhere)** — every walkthrough excerpt is a
    substring of its source file, every claimed marker is emitted by the
    code it claims, the Makefile asserts exactly the walkthrough's marker
-   set, the MBR carries `55 AA` and its LBA DAP, and stage 2 contains
+   set, the MBR carries `55 AA` within an exactly-512-byte image, loads stage 2
+   with a CHS int 13h read, and stage 2 contains
    the whole ladder (lgdt, CR0.PE, IA32_EFER, CR0.PG, the L=1 GDT
    entry).
 
